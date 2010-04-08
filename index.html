@@ -11,7 +11,10 @@
 
 <body>
 	<script src="piano.js"></script>
-	<script>Piano();</script>
+	<script>
+		var grandPiano = Piano.createInstance(Piano.Voice.GRAND_PIANO);
+		document.body.appendChild(grandPiano);
+	</script>
 </body>
 
 </html>
