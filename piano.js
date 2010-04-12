@@ -68,7 +68,6 @@
 			}
 			for (var key in canvas.pianoKeys) {
 				if(canvas.pianoKeys.hasOwnProperty(key) && canvas.pianoKeys[key].isMouseHit(point.x, point.y)) {
-					console.log(canvas.pianoKeys[key]);
 					canvas.pianoKeys[key].press();
 					canvas.mouseTarget = canvas.pianoKeys[key];
 					break;
