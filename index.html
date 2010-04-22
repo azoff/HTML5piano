@@ -10,10 +10,13 @@
 </head>
 
 <body>
-	<div id="piano" style="width: 100px; height: 100px;"></div>
+	<div id="piano"></div>
 	<script src="piano.js"></script>
 	<script>
-		var grandPiano = Piano.createInstance(Piano.Voices.GRAND_PIANO);
+		var grandPiano = Piano.createInstance({
+			width: 150, 
+			height: 150
+		});
 		document.getElementById("piano").appendChild(grandPiano);
 	</script>
 </body>
