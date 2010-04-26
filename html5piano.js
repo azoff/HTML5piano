@@ -48,8 +48,8 @@
 					};
 			
 					options						= options || {};
-					options.height				= options.height || 100;
-					options.width				= options.width || 100;
+					options.height				= options.height || 150;
+					options.width				= options.width || 150;
 					options.backgroundFill		= options.backgroundFill || colors.brown;
 					options.backgroundStroke	= options.backgroundStroke || colors.black;
 					options.whiteKeyFill		= options.whiteKeyFill || colors.white;
