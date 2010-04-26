@@ -172,15 +172,15 @@
 				_private.Piano.attachListeners(instance);
 				instance.drawPiano();
 			} else {
-				queue = 1 - ((_private.Piano.Key.notes.length - queue) / _private.Piano.Key.notes.length);
+				queue = (_private.Piano.Key.notes.length - queue) / _private.Piano.Key.notes.length;
 				instance.drawLoader(queue);
 			}
 		};
 	};
 	
 	_private.Piano.attachListeners = function(canvas) {
-		canvas.addEventListener("mousedown", function(event, point){
-			point = { x: event.clientX-7, y: event.clientY-7 };
+		canvas.addEventListener("mousedown", function(event, point) {
+			point = { x: event.clientX-event.target.offsetLeft, y: event.clientY-event.target.offsetTop };
 			if (canvas.mouseTarget) {
 				canvas.mouseTarget.release();
 				canvas.mouseTarget = null;
@@ -189,17 +189,17 @@
 				if((canvas.pianoKeys[key] instanceof _private.Piano.Key) && canvas.pianoKeys[key].isMouseHit(point.x, point.y)) {
 					canvas.pianoKeys[key].press();
 					canvas.mouseTarget = canvas.pianoKeys[key];
+					canvas.drawPiano();
 					break;
 				}
 			} 
-			canvas.drawPiano();
 		}, true);
 		canvas.addEventListener("mouseup", function(event){
 			if (canvas.mouseTarget) {
 				canvas.mouseTarget.release();
 				canvas.mouseTarget = null;
+				canvas.drawPiano();
 			}
-			canvas.drawPiano();
 		}, true);
 		canvas.addEventListener("mouseover", function(){
 			canvas.pianoPower.on = true;
@@ -243,7 +243,7 @@
 	_private.Piano.Loader = function(options) {
 
 		this.textTop = options.height / 5;
-		this.textLeft = options.width / 12;
+		this.textLeft = options.width / 18;
 		this.textColor = options.loaderFill;
 		this.font = (options.height / 8) + "px " + options.titleFont;
 		
