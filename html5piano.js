@@ -10,7 +10,6 @@
  * Date: Sunday, April 12th 2010
  *
  * For usage examples and API documentation, see azoffdesign.com/piano 
- *
  */
 
 /*jslint onevar: true, strict: true, browser: true */
