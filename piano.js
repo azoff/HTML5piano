@@ -18,6 +18,10 @@
 "use strict";
 (function(_public, _private){
 	
+	var 
+	AUDIO_FOLDER = "instruments",
+	IMAGE_FOLDER = "images";
+	
 	_public.Piano = {
 		
 		Voices: {
@@ -26,45 +30,67 @@
 			
 		},
 		
-		createInstance: function(options, colors, reqs) {
+		load: function(id, options, colors, reqs) {
 			
-			colors = { 
-				black: "#000", 
-				white: "#FFF", 
-				brown: "#8A4B08", 
-				green: "#0F0", 
-				red: "#F00", 
-				gray: "#DDD",
-				darkGray: "#333"
-			};
+			reqs = _private.Piano.getRequirements(id, _public.document);
 			
-			options						= options || {};
-			options.height				= options.height || 100;
-			options.width				= options.width || 100;
-			options.backgroundFill		= options.backgroundFill || colors.brown;
-			options.backgroundStroke	= options.backgroundStroke || colors.black;
-			options.whiteKeyFill		= options.whiteKeyFill || colors.white;
-			options.whiteKeyStroke		= options.whiteKeyStroke || colors.darkGray;
-			options.blackKeyFill		= options.blackKeyFill || colors.black;
-			options.blackKeyStroke		= options.blackKeyStroke || colors.darkGray;
-			options.activeKeyFill		= options.activeKeyFill || colors.gray;
-			options.activeKeyStroke		= options.activeKeyStroke || colors.black;
-			options.titleColor			= options.titleColor || colors.white;
-			options.titleFont			= options.titleFont || "'Times New Roman', Times";
-			options.powerOnFill			= options.powerOnFill || colors.green;
-			options.powerOnStroke		= options.powerOnStroke || colors.black;
-			options.powerOffFill		= options.powerOffFill || colors.red;
-			options.powerOffStroke		= options.powerOffStroke || colors.black;			
+			if(reqs.target) {
 			
-			reqs = _private.Piano.getRequirements(_public.document);
+				if(reqs.canvas && reqs.audio && reqs.ext) {
+					
+					colors = { 
+						black: "#000", 
+						white: "#FFF", 
+						brown: "#8A4B08", 
+						green: "#0F0", 
+						red: "#F00", 
+						gray: "#DDD",
+						darkGray: "#333"
+					};
 			
-			if(reqs) {
-				options.voice		= options.voice || _public.Piano.Voices.GRAND_PIANO;
-				options.extension	= _private.Piano.getAudioExtension(reqs.audio);
-				return options.extension ? _private.Piano(options, reqs.canvas) : null;
-			}
+					options						= options || {};
+					options.height				= options.height || 100;
+					options.width				= options.width || 100;
+					options.backgroundFill		= options.backgroundFill || colors.brown;
+					options.backgroundStroke	= options.backgroundStroke || colors.black;
+					options.whiteKeyFill		= options.whiteKeyFill || colors.white;
+					options.whiteKeyStroke		= options.whiteKeyStroke || colors.darkGray;
+					options.blackKeyFill		= options.blackKeyFill || colors.black;
+					options.blackKeyStroke		= options.blackKeyStroke || colors.darkGray;
+					options.activeKeyFill		= options.activeKeyFill || colors.gray;
+					options.activeKeyStroke		= options.activeKeyStroke || colors.black;
+					options.loaderFill			= options.loaderFill || colors.black;
+					options.loaderFont			= options.loaderFont || "'Times New Roman', Times";
+					options.titleColor			= options.titleColor || colors.white;
+					options.titleFont			= options.titleFont || "'Times New Roman', Times";
+					options.powerOnFill			= options.powerOnFill || colors.green;
+					options.powerOnStroke		= options.powerOnStroke || colors.black;
+					options.powerOffFill		= options.powerOffFill || colors.red;
+					options.powerOffStroke		= options.powerOffStroke || colors.black;			
+					options.voice				= options.voice || _public.Piano.Voices.GRAND_PIANO;
+					options.extension			= reqs.ext;
+				
+					reqs.target.appendChild(_private.Piano(options, reqs.canvas));
+					
+				} else {
+				
+					reqs.map = _public.document.createElement("map");
+					reqs.map.id = reqs.map.name = "HTML5_Piano_Map";
+					reqs.map.innerHTML = "<area shape='rect' coords='16,27,74,92' href='http://www.apple.com/safari/download/' alt='Safari 4.0+' title='Safari 4.0+' /><area shape='rect' coords='75,29,133,93' href='http://www.mozilla.com/firefox/' alt='Firefox 3.6+' title='Firefox 3.6+' /><area shape='rect' coords='13,88,71,145' href='http://www.opera.com/download/' alt='Opera 10.5+' title='Opera 10.5+' /><area shape='rect' coords='75,89,133,145' href='http://www.google.com/chrome' alt='Chrome 5.0+' title='Chrome 5.0+' />";
+					
+					reqs.img = _public.document.createElement("img");
+					reqs.img.alt = "Your browser does not support the minimum requirements to display the HTML5 Piano!";
+					reqs.img.src = IMAGE_FOLDER + "/browser.jpg";
+					reqs.img.border = 0;
+					reqs.img.useMap = "#" + reqs.map.id;
+					
+					reqs.target.appendChild(reqs.img);
+					reqs.target.appendChild(reqs.map);
+				
+				}
+				
+			} 
 			
-			return null;
 		}
 		
 	};
@@ -78,8 +104,12 @@
 		canvas.pianoBg		= new _private.Piano.Background(options);
 		canvas.pianoPower	= new _private.Piano.Power(options);
 		canvas.pianoTitle	= new _private.Piano.Title(options);
-		canvas.pianoKeys	= _private.Piano.Key.loadKeys(options, _private.Piano.onKeysLoaded(canvas));
+		canvas.loader		= new _private.Piano.Loader(options);
+		canvas.pianoKeys	= _private.Piano.Key.loadKeys(options, _private.Piano.onKeyLoaded(canvas));
 		canvas.drawPiano	= _private.Piano.drawPiano;
+		canvas.drawLoader	= _private.Piano.drawLoader;
+		
+		canvas.drawLoader(0);
 		
 		return canvas;
 	};
@@ -107,21 +137,45 @@
 		
 	};
 
-	_private.Piano.getRequirements = function(doc, audio, canvas) {
-		audio = new Audio("");
-		canvas = doc.createElement('canvas');
-		if( !!(audio.play) && !!(canvas.getContext) ) {
-			_private.Piano.extendAudioElement();
-			return { audio: audio, canvas: canvas };
+	_private.Piano.getRequirements = function(id, doc, audio, canvas, target, mime, reqs) {
+		if(doc.createElement && doc.getElementById) {
+			audio = new Audio("");
+			canvas = doc.createElement('canvas');
+			target = id.appendChild ? id : doc.getElementById(id);
+			reqs = {};
+			if(audio.play) {
+				_private.Piano.extendAudioElement();
+				reqs.audio = audio;
+				if(audio.canPlayType) {
+					mime = audio.canPlayType("audio/mpeg");
+					if(mime.length > 0 && mime != "no") { reqs.ext = ".mp3"; }
+					mime = audio.canPlayType("audio/x-wav");
+					if(mime.length > 0 && mime != "no") { reqs.ext = ".wav"; }
+					mime = audio.canPlayType("audio/wav");
+					if(mime.length > 0 && mime != "no") { reqs.ext = ".wav"; }
+				}
+			} 
+			if(canvas.getContext) {
+				reqs.canvas = canvas;
+			} 
+			if(target.appendChild) {
+				reqs.target = target;
+			}			
+			return reqs;
 		} else {
 			return null;
 		}
 	};
 	
-	_private.Piano.onKeysLoaded = function(instance) {
-		return function() {
-			_private.Piano.attachListeners(instance);
-			instance.drawPiano();
+	_private.Piano.onKeyLoaded = function(instance) {
+		return function(queue) {
+			if(queue === 0) {
+				_private.Piano.attachListeners(instance);
+				instance.drawPiano();
+			} else {
+				queue = 1 - ((_private.Piano.Key.notes.length - queue) / _private.Piano.Key.notes.length);
+				instance.drawLoader(queue);
+			}
 		};
 	};
 	
@@ -175,25 +229,46 @@
 	};
 	
 	_private.Piano.drawPiano = function(context) {
-	
 		context = this.getContext("2d");
 		this.pianoBg.draw(context);
 		this.pianoTitle.draw(context);
 		this.pianoPower.draw(context);
 		this.pianoKeys.draw(context);
+	};
+	
+	_private.Piano.drawLoader = function(completed) {
+		this.loader.completed = completed;
+		this.loader.draw(this.getContext("2d"));
+	};
+	
+	_private.Piano.Loader = function(options) {
+
+		this.textTop = options.height / 5;
+		this.textLeft = options.width / 12;
+		this.textColor = options.loaderFill;
+		this.font = (options.height / 8) + "px " + options.titleFont;
+		
+		this.spinnerTop = options.height / 4;
+		this.spinnerLeft = options.width / 12;
+		this.spinnerWidth = options.width / 1.13;
+		this.spinnerHeight = options.height / 20;
+		this.spinnerFill = options.loaderFill;
+		this.spinnerRadius = options.width / 7;
+		
+		this.fullWidth = options.width;
+		this.fullHeight = options.height;
 		
 	};
 	
-	_private.Piano.getAudioExtension = function(audio, mime) {
-		if(!!audio.canPlayType) {
-			mime = audio.canPlayType("audio/mpeg");
-			if(mime.length > 0 && mime != "no") { return ".mp3"; }
-			mime = audio.canPlayType("audio/x-wav");
-			if(mime.length > 0 && mime != "no") { return ".wav"; }
-			mime = audio.canPlayType("audio/wav");
-			if(mime.length > 0 && mime != "no") { return ".wav"; }
-		} 
-		return null;
+	_private.Piano.Loader.prototype = {
+		draw: function(context) {
+			context.clearRect(0, 0, this.fullWidth, this.fullHeight);
+			context.fillStyle = this.textColor;
+			context.font = this.font;
+			context.fillText("Loading Piano...", this.textLeft, this.textTop);
+			context.fillStyle = this.spinnerFill;
+			context.fillRect(this.spinnerLeft, this.spinnerTop, this.completed * this.spinnerWidth, this.spinnerHeight); 
+		}
 	};
 	
 	_private.Piano.Title = function(options) {
@@ -205,11 +280,9 @@
 	
 	_private.Piano.Title.prototype = {
 		draw: function(context) {
-			if (!!context.fillText) {
-				context.fillStyle = this.color;
-				context.font = this.font;
-				context.fillText("HTML5 PIANO", this.left, this.top);
-			}
+			context.fillStyle = this.color;
+			context.font = this.font;
+			context.fillText("HTML5 PIANO", this.left, this.top);
 		}
 	};
 	
@@ -244,6 +317,7 @@
 	
 	_private.Piano.Background.prototype = {
 		draw: function(context) {
+			context.clearRect(0, 0, this.width, this.height);
 			context.fillStyle = this.fill;
 			context.strokeStyle = this.stroke;
 			context.fillRect(0, 0, this.width, this.height);
@@ -280,8 +354,6 @@
 	
 	_private.Piano.Key.notes = ["gs","a","bb","b","c","cs","d","eb","e","f","fs","g"];
 	
-	_private.Piano.Key.audioFolder = "instruments";
-	
 	_private.Piano.Key.loadKeys = function(options, callback, keyData, keys, key, path, i) {
 		keys = { 
 			blackKeys: [], 
@@ -295,7 +367,7 @@
 				}
 			}
 		};
-		path = _private.Piano.Key.audioFolder + "/" + options.voice + "/";
+		path = AUDIO_FOLDER + "/" + options.voice + "/";
 		keyData = {
 			callback: callback,
 			queue: 0,
@@ -348,7 +420,7 @@
 	
 	_private.Piano.Key.onKeyLoaded = function(data) {
 		return function() {
-			if(--data.queue === 0) { data.callback(); }
+			data.callback(--data.queue);
 		};
 	};
 	

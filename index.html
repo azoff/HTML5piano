@@ -13,11 +13,11 @@
 	<div id="piano"></div>
 	<script src="piano.js"></script>
 	<script>
-		var grandPiano = Piano.createInstance({
-			width: 150, 
-			height: 150
+		Piano.load("piano", {
+			width: 550, 
+			height: 550,
+			backgroundFill: "#333"
 		});
-		document.getElementById("piano").appendChild(grandPiano);
 	</script>
 </body>
 
