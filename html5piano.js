@@ -1,5 +1,5 @@
 /*!
- * Piano v1.0.0
+ * HTML5 Piano v1.0.0
  *  A JavaScript implementation of a simple keyboard using HTML5 technologies.
  *  http://azoffdesign.com/piano
  *
@@ -19,7 +19,7 @@
 	
 	var 
 	AUDIO_FOLDER = "instruments",
-	IMAGE_FOLDER = "images";
+	BROWSER_IMAGE = "images/browser.jpg";
 	
 	_public.Piano = {
 		
@@ -79,7 +79,7 @@
 					
 					reqs.img = _public.document.createElement("img");
 					reqs.img.alt = "Your browser does not support the minimum requirements to display the HTML5 Piano!";
-					reqs.img.src = IMAGE_FOLDER + "/browser.jpg";
+					reqs.img.src = BROWSER_IMAGE;
 					reqs.img.border = 0;
 					reqs.img.useMap = "#" + reqs.map.id;
 					
