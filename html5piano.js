@@ -19,7 +19,7 @@
 	
 	var 
 	AUDIO_FOLDER = "instruments",
-	BROWSER_IMAGE = "images/browser.jpg";
+	BROWSER_IMAGE = "browser.jpg";
 	
 	_public.Piano = {
 		
