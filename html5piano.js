@@ -125,10 +125,7 @@
 			version = /Chrome\/([^ ]*) /.exec(navigator.userAgent);
 			if (version && version.length == 2) {
 				version = version[1].toString().split(".", 3);
-				if (version.length > 2 && (
-						parseInt(version[0], 10) < 5 ||
-						parseInt(version[1], 10) < 0 ||
-						parseInt(version[2], 10) <= 342 )) {
+				if (version.length > 2 && (parseInt(version[0], 10) < 5 || parseInt(version[1], 10) <= 0 )) {
 					HTMLAudioElement.prototype.stop = HTMLAudioElement.prototype.load;
 				}
 			}
