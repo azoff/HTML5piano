@@ -113,24 +113,13 @@
 		return canvas;
 	};
 	
-	_private.Piano.extendAudioElement = function(version) {
-	
-		if(!HTMLAudioElement.prototype.stop) {
-			// add stop() to prototype for audio
-			HTMLAudioElement.prototype.stop = function() { this.pause(); this.currentTime=0; };
-
-			// TODO: This is a hack because Chrome does not properly implement the MediaElement.currentTime
-			//		 attribute and there is no way to check for this bug in a browser agnostic way. So far,
-			//		 any version of chrome that supports <audio> and is of version 5.0.342 or earlier is failing.
-			version = /Chrome\/([^ ]*) /.exec(navigator.userAgent);
-			if (version && version.length == 2) {
-				version = version[1].toString().split(".", 3);
-				if (version.length > 2 && (parseInt(version[0], 10) < 5 || parseInt(version[1], 10) <= 0 )) {
-					HTMLAudioElement.prototype.stop = HTMLAudioElement.prototype.load;
-				}
-			}
+	_private.Piano.stopAudio = function(audio) { 
+		try{
+			audio.pause(); 
+			audio.currentTime = 0;
+		} catch (e) {
+			audio.load();
 		}
-		
 	};
 
 	_private.Piano.getRequirements = function(id, doc, audio, canvas, target, mime, reqs) {
@@ -140,7 +129,6 @@
 			target = id.appendChild ? id : doc.getElementById(id);
 			reqs = {};
 			if(audio.play) {
-				_private.Piano.extendAudioElement();
 				reqs.audio = audio;
 				if(audio.canPlayType) {
 					mime = audio.canPlayType("audio/mpeg");
@@ -439,7 +427,7 @@
 		},
 		press: function() {
 			if(!this.pressed) {	
-				this.audio.stop();			
+				_private.Piano.stopAudio(this.audio);			
 				this.audio.play();
 				this.pressed = true;
 			}
